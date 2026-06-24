@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>博客首页</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+        /* 基础重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* body 负责定位和堆叠上下文 */
+        body {
+            position: relative;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            /* 背景图片同样设置，但会被伪元素覆盖，这里可留作降级 */
+            background: url('/images/login-bg.png') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        /* 毛玻璃伪元素：覆盖同一张背景图并模糊 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/images/login-bg.png') no-repeat center center fixed;
+            background-size: cover;
+            filter: blur(12px);      /* 调整模糊程度 */
+            z-index: -1;             /* 置于所有内容下方 */
+        }
+
+        /* 为了让内容可读，内容区域添加半透背景但不模糊 */
+        .navbar-custom {
+            background-color: rgba(255, 255, 255, 0.7);  /* 半透白，无模糊 */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 0.8rem 0;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: #1e293b !important;
+            margin: 0 0.5rem;
+        }
+        .nav-link.active {
+            color: #0f172a !important;
+            border-bottom: 2px solid #0f172a;
+        }
+
+        .user-info {
+            font-size: 0.9rem;
+            color: #1e293b;
+        }
+
+        .search-section {
+            margin: 2rem auto;
+            max-width: 600px;
+        }
+        .search-section .form-control,
+        .search-section .btn {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255,255,255,0.6);
+            color: #0f172a;
+        }
+        .search-section .form-control:focus {
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 0 0.2rem rgba(255,255,255,0.5);
+        }
+
+        .tag-cloud {
+            margin: 1.5rem auto;
+            text-align: center;
+            color: #FFFFFF;
+        }
+        .tag-badge {
+            background-color: rgba(226, 232, 240, 0.8);
+            color: #1e293b;
+            padding: 0.4rem 0.8rem;
+            margin: 0.2rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: 0.2s;
+            display: inline-block;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .tag-badge:hover {
+            background-color: rgba(203, 213, 224, 0.9);
+        }
+        .tag-badge.active {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        .new-article-btn {
+            margin: 1rem 0 2rem;
+            text-align: center;
+        }
+        .new-article-btn .btn {
+            background: rgba(25, 135, 84, 0.9);
+            border: none;
+            transition: 0.2s;
+        }
+        .new-article-btn .btn:hover {
+            background: rgba(25, 135, 84, 1);
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.75);
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 1.5rem;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .card-title {
+            color: #0f172a;
+            font-weight: 600;
+        }
+        .card-text {
+            color: #1e293b;
+        }
+        .text-muted {
+            color: #334155 !important;
+        }
+        .btn-sm {
+            border-radius: 20px;
+        }
+
+        /* 可选：调整搜索按钮字体大小 */
+        .search-section .btn {
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 顶部导航栏 -->
+<nav class="navbar navbar-custom">
+  <div class="container">
+    <div class="mx-auto">
+      <ul class="nav justify-content-center">
+        <li class="nav-item"><a class="nav-link" href="/">博客平台</a></li>
+        <li class="nav-item"><a class="nav-link" href="/projects">项目</a></li>
+        <li class="nav-item"><a class="nav-link" href="/photos">照片墙</a></li>
+        <li class="nav-item"><a class="nav-link " href="/music">音乐</a></li>
+        <li class="nav-item"><a class="nav-link" href="/talks">杂谈</a></li>
+        <li class="nav-item"><a class="nav-link" href="/about">关于</a></li>
+        <li class="nav-item"><a class="nav-link" href="/drafts">草稿箱</a></li>
+      </ul>
+    </div>
+    <div class="user-info">
+      <span sec:authentication="name">用户名</span>
+      <a th:href="@{/logout}" class="btn btn-sm btn-outline-danger ms-2">登出</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container" style="max-width: 1000px; margin-top: 2rem;">
+  <!-- 搜索框 -->
+  <div class="search-section">
+    <form th:action="@{/projects}" method="get" class="d-flex gap-2">
+      <input type="text" name="keyword" class="form-control form-control-lg rounded-pill" placeholder="搜索文章标题或内容..." th:value="${param.keyword}">
+      <button class="btn btn-primary rounded-pill px-4" type="submit">搜索</button>
+    </form>
+  </div>
+
+  <!-- 标签云 -->
+  <div class="tag-cloud">
+    <span class="me-2 fw-semibold">热门标签：</span>
+    <a th:each="t : ${tags}" th:href="@{/projects(tag=${t.name})}" th:text="${t.name}" class="tag-badge" th:classappend="${selectedTag != null && selectedTag == t.name} ? 'active' : ''"></a>
+    <a th:href="@{/projects}" class="tag-badge">全部</a>
+  </div>
+
+  <!-- 发布新文章按钮 -->
+  <div class="new-article-btn">
+    <a th:href="@{/article/new}" class="btn btn-success rounded-pill px-4 py-2">+ 发布新文章</a>
+  </div>
+
+  <!-- 文章列表 -->
+  <div th:if="${articles != null and !articles.empty}">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      <div th:each="article : ${articles}" class="col">
+        <div class="card h-100">
+          <img th:if="${article.coverImage != null}" th:src="${article.coverImage}" class="card-img-top" alt="封面" style="height: 200px; object-fit: cover;">
+          <img th:unless="${article.coverImage != null}" th:src="'/images/default-cover.jpg'" class="card-img-top" alt="默认封面" style="height: 200px; object-fit: cover;">
+          <div class="card-body">
+            <h5 class="card-title">
+              <a th:href="'/article/' + ${article.id}" th:text="${article.title}" class="text-decoration-none text-dark"></a>
+            </h5>
+            <p class="card-text" th:utext="${#strings.length(article.content) > 100 ? #strings.substring(article.content, 0, 100) + '...' : article.content}">内容预览...</p>
+            <div class="mb-2">
+              <span th:each="tag : ${article.tags}" class="badge bg-secondary me-1" th:text="${tag.name}"></span>
+            </div>
+            <div class="text-muted small">
+              作者：<span th:text="${article.author}"></span><br>
+              发布时间：<span th:text="${#temporals.format(article.createTime, 'yyyy-MM-dd')}"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div th:if="${articles == null or articles.empty}" class="text-center text-muted mt-5">
+    暂无文章，去发布一篇吧～
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

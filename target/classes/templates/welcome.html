@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>博客平台 · 现代化博客管理系统</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: url('/images/login-bg.png') no-repeat center top fixed;
+            background-size: cover;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* 导航栏 */
+        .navbar-custom {
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 0.8rem 0;
+        }
+        .nav-link {
+            font-weight: 500;
+            color: #1e293b !important;
+            margin: 0 0.5rem;
+            transition: 0.2s;
+        }
+        .nav-link:hover {
+            color: #0d6efd !important;
+        }
+        .user-info {
+            font-size: 0.9rem;
+            color: #1e293b;
+        }
+
+        /* 波浪容器（紧贴导航栏下方，上下浮动动画） */
+        .wave-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
+            margin-top: 0;          /* 紧贴导航栏 */
+            animation: waveFloat 3s ease-in-out infinite;
+        }
+        @keyframes waveFloat {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .wave-svg {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .wave-svg svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        /* 波浪路径水平摆动 */
+        .wave-path {
+            animation: waveMoveX 10s ease-in-out infinite;
+        }
+        .wave-path2 {
+            animation: waveMoveX 15s ease-in-out infinite reverse;
+        }
+        @keyframes waveMoveX {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-2%); }
+            100% { transform: translateX(0); }
+        }
+
+        /* 波浪下方纯白色背景区域 */
+        .white-bg {
+            background-color: #ffffff;
+            padding-top: 3rem;
+            padding-bottom: 4rem;
+        }
+
+        /* 两栏内容区 */
+        .content-grid {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        .card-modern {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            height: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #eef2ff;
+        }
+        .card-modern:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+        }
+        .avatar-lg {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .social-icons a {
+            display: inline-block;
+            background: #e9ecef;
+            width: 36px;
+            height: 36px;
+            line-height: 36px;
+            text-align: center;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            color: #1e293b;
+            transition: 0.2s;
+        }
+        .social-icons a:hover {
+            background: #0d6efd;
+            color: white;
+        }
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #eef2ff;
+        }
+        .feature-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        .feature-list li {
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .feature-list i {
+            color: #0d6efd;
+            width: 24px;
+        }
+        .update-item {
+            border-bottom: 1px solid #eef2ff;
+            padding: 0.8rem 0;
+        }
+        .update-item:last-child {
+            border-bottom: none;
+        }
+        .update-title {
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .update-time {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+        .runtime {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 0.8rem;
+            text-align: center;
+            margin-top: 1rem;
+            border: 1px solid #eef2ff;
+        }
+        @media (max-width: 768px) {
+            .wave-container { margin-top: 0; }
+            @keyframes waveFloat { 50% { transform: translateY(-4px); } }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<nav class="navbar navbar-custom">
+  <div class="container">
+    <div class="mx-auto">
+      <ul class="nav justify-content-center">
+        <li class="nav-item"><a class="nav-link" href="/">博客平台</a></li>
+        <li class="nav-item"><a class="nav-link" href="/projects">项目</a></li>
+        <li class="nav-item"><a class="nav-link" href="/photos">照片墙</a></li>
+        <li class="nav-item"><a class="nav-link" href="/music">音乐</a></li>
+        <li class="nav-item"><a class="nav-link" href="/talks">杂谈</a></li>
+        <li class="nav-item"><a class="nav-link" href="/about">关于</a></li>
+        <li class="nav-item"><a class="nav-link" href="/drafts">草稿箱</a></li>
+      </ul>
+    </div>
+    <div class="user-info">
+      <span sec:authentication="name">用户名</span>
+      <a th:href="@{/logout}" class="btn btn-sm btn-outline-danger ms-2">登出</a>
+    </div>
+  </div>
+</nav>
+
+<!-- 白色波浪（紧贴导航栏下方） -->
+<div class="wave-container">
+  <div class="wave-svg">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+          <stop offset="50%" stop-color="#ffffff" stop-opacity="1" />
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.9" />
+        </linearGradient>
+      </defs>
+      <path class="wave-path" fill="url(#waveGrad)" fill-opacity="1"
+            d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,53.3C672,53,768,75,864,80C960,85,1056,75,1152,58.7C1248,43,1344,21,1392,10.7L1440,0L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z" />
+      <path class="wave-path2" fill="#ffffff" fill-opacity="0.6"
+            d="M0,96L48,101.3C96,107,192,117,288,112C384,107,480,85,576,85.3C672,85,768,107,864,112C960,117,1056,107,1152,90.7C1248,75,1344,53,1392,42.7L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z" />
+    </svg>
+  </div>
+</div>
+
+<!-- 波浪下方纯白色背景区域（所有内容依次下移） -->
+<div class="white-bg">
+  <div class="content-grid">
+    <div class="row g-4">
+      <!-- 左侧：作者信息 + 社交账号 -->
+      <div class="col-md-5">
+        <div class="card-modern text-center">
+          <img th:src="@{/images/avatar.png}" alt="头像" class="avatar-lg" onerror="this.src='https://via.placeholder.com/100?text=Avatar'">
+          <h3 class="mt-2">flyaway</h3>
+          <p class="text-muted">海阔凭鱼跃，天高任鸟飞</p>
+          <div class="social-icons">
+            <a href="#"><i class="fab fa-github"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fas fa-envelope"></i></a>
+            <a href="#"><i class="fab fa-telegram"></i></a>
+          </div>
+          <div class="mt-3 text-start">
+            <p><i class="fas fa-map-pin me-2"></i> 所在城市：太原</p>
+            <p><i class="fas fa-code me-2"></i> 技术栈：Spring Boot / Thymeleaf / MySQL</p>
+            <p><i class="fas fa-music me-2"></i> 爱好：动漫 / 游戏 / 长笛</p>
+          </div>
+          <div class="runtime">
+            <i class="fas fa-clock me-1"></i> 站点运行时间：<span id="runTime">加载中...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧：功能介绍 + 最新动态 -->
+      <div class="col-md-7">
+        <div class="card-modern">
+          <div class="section-title">
+            <i class="fas fa-cogs me-2"></i> 功能介绍
+          </div>
+          <ul class="feature-list">
+            <li><i class="fas fa-check-circle"></i> 文章发布/编辑/删除，支持富文本编辑</li>
+            <li><i class="fas fa-check-circle"></i> 标签系统，按标签筛选文章</li>
+            <li><i class="fas fa-check-circle"></i> 图片上传与服务器存储</li>
+            <li><i class="fas fa-check-circle"></i> 响应式设计，移动端适配</li>
+            <li><i class="fas fa-check-circle"></i> 用户登录/登出，角色权限控制</li>
+            <li><i class="fas fa-check-circle"></i> 草稿箱功能，支持文章状态切换</li>
+          </ul>
+        </div>
+
+        <div class="card-modern mt-4">
+          <div class="section-title">
+            <i class="fas fa-bolt me-2"></i> 最新动态
+          </div>
+          <div th:if="${recentArticles != null and !recentArticles.empty}">
+            <div th:each="article : ${recentArticles}" class="update-item">
+              <div class="update-title">
+                <a th:href="'/article/' + ${article.id}" th:text="${article.title}" class="text-decoration-none text-dark"></a>
+              </div>
+              <div class="update-time" th:text="${#temporals.format(article.createTime, 'yyyy-MM-dd')}"></div>
+            </div>
+          </div>
+          <div th:unless="${recentArticles != null and !recentArticles.empty}" class="text-muted py-3 text-center">
+            暂无最新动态，去发布一篇文章吧～
+          </div>
+          <div class="text-end mt-2">
+            <a href="/projects" class="btn btn-sm btn-link">查看更多 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // 站点运行时间计算
+    function siteRunTime() {
+        const start = new Date(2026, 5, 1);
+        const now = new Date();
+        const diff = now - start;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (86400000)) / 3600000);
+        document.getElementById('runTime').innerText = days + "天" + hours + "小时";
+    }
+    siteRunTime();
+</script>
+</body>
+</html>
