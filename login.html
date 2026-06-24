@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统登录 - 博客管理平台</title>
+    <!-- 使用 Google Fonts 提升字体质感 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: url('/images/login-bg.png') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* 卡片容器 */
+        .login-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(6px);
+            width: 100%;
+            max-width: 420px;
+            padding: 2.5rem 2rem 2rem 2rem;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transition: transform 0.2s ease;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .login-card:hover {
+            transform: translateY(-4px);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 头部标题 */
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1e293b;
+            letter-spacing: -0.3px;
+        }
+
+        .login-header .sub {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 8px;
+        }
+
+        /* 表单组 */
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            background-color: #f8fafc;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #2e7d32;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            background-color: #ffffff;
+        }
+
+        /* 登录按钮 */
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2e7d32 100%);
+            border: none;
+            padding: 12px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            font-family: inherit;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            margin-top: 8px;
+        }
+
+        .login-btn:hover {
+            opacity: 0.92;
+        }
+
+        .login-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 底部版权 / 签名 */
+        .footer-note {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            border-top: 1px solid #eef2ff;
+            padding-top: 1.2rem;
+        }
+
+        .footer-note a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .footer-note a:hover {
+            text-decoration: underline;
+        }
+
+        /* 错误/登出消息 */
+        .message {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            padding: 6px;
+            border-radius: 12px;
+        }
+
+        .error-message {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .logout-message {
+            background-color: #e0f2fe;
+            color: #0284c7;
+        }
+
+        /* 响应式 */
+        @media (max-width: 480px) {
+            .login-card {
+                margin: 1rem;
+                padding: 1.8rem;
+            }
+            .login-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="login-header">
+        <h1>系统登录</h1>
+        <div class="sub">博客管理平台</div>
+    </div>
+
+    <form th:action="@{/login}" method="post">
+        <div class="input-group">
+            <label for="username">用户名</label>
+            <input type="text" id="username" name="username" placeholder="请输入用户名" required autofocus>
+        </div>
+        <div class="input-group">
+            <label for="password">密码</label>
+            <input type="password" id="password" name="password" placeholder="请输入密码" required>
+        </div>
+        <button type="submit" class="login-btn">登录</button>
+
+        <!-- 错误提示（Spring Security 标准） -->
+        <div th:if="${param.error}" class="message error-message">
+            用户名或密码错误，请重试
+        </div>
+        <div th:if="${param.logout}" class="message logout-message">
+            您已成功退出登录
+        </div>
+    </form>
+
+    <div class="footer-note">
+        GitHub@X-flyaway
+    </div>
+</div>
+
+</body>
+</html>
