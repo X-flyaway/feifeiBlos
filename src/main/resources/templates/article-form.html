@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>编辑文章</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.css" rel="stylesheet">
+  <style>
+    /* 基础重置 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* body 背景图片（降级） */
+    body {
+      position: relative;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      background: url('/images/login-bg.png') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    /* 毛玻璃伪元素：模糊的背景图 */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('/images/login-bg.png') no-repeat center center fixed;
+      background-size: cover;
+      filter: blur(12px);
+      z-index: -1;
+    }
+
+    /* 表单卡片容器（添加半透明背景，不模糊） */
+    .form-container {
+      background-color: rgba(255, 255, 255, 0.75);
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      margin: 2rem auto;
+      max-width: 800px;
+    }
+
+    /* 标题样式 */
+    h2 {
+      color: #0f172a;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    /* 表单标签 */
+    label {
+      font-weight: 500;
+      color: #1e293b;
+      margin-bottom: 0.25rem;
+    }
+
+    /* 输入框、下拉框、文本区域统一半透明背景 */
+    .form-control, .form-select {
+      background-color: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(255,255,255,0.6);
+      color: #0f172a;
+    }
+    .form-control:focus, .form-select:focus {
+      background-color: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 0 0 0.2rem rgba(255,255,255,0.5);
+    }
+
+    /* 按钮样式（保持清晰） */
+    .btn {
+      border-radius: 20px;
+    }
+    .btn-outline-secondary {
+      background-color: rgba(255,255,255,0.7);
+    }
+    .btn-primary {
+      background: rgba(25, 135, 84, 0.9);
+      border: none;
+    }
+    .btn-primary:hover {
+      background: rgba(25, 135, 84, 1);
+    }
+    .btn-secondary:hover {
+      background-color: rgba(108, 117, 125, 0.9);
+    }
+
+    /* Summernote 编辑器背景适配 */
+    .note-editor {
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-container">
+  <h2 th:if="${article.id == null}">发布新文章</h2>
+  <h2 th:if="${article.id != null}">编辑文章</h2>
+
+  <form th:action="@{/article/save}" th:object="${article}" method="post">
+    <input type="hidden" th:field="*{id}">
+
+    <div class="mb-3">
+      <label>标题</label>
+      <input type="text" th:field="*{title}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label>作者</label>
+      <input type="text" th:field="*{author}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label>封面图片</label>
+      <input type="file" id="coverFile" class="form-control" accept="image/*">
+      <input type="hidden" name="coverImage" th:field="*{coverImage}">
+      <div class="form-text">建议尺寸：800x400，图片将被上传到服务器。</div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">标签（可多选）</label>
+      <select name="tagIds" class="form-select" multiple size="5">
+        <option th:each="tag : ${allTags}"
+                th:value="${tag.id}"
+                th:text="${tag.name}"
+                th:selected="${article.tags != null and article.tags.contains(tag)}"></option>
+      </select>
+      <div class="form-text text-muted">按住 Ctrl (Windows) / Command (Mac) 可多选</div>
+    </div>
+
+    <div class="mb-3">
+      <label>内容</label>
+      <textarea id="content" name="content" class="form-control" rows="10" required th:text="*{content}"></textarea>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+      <a th:href="@{/}" class="btn btn-secondary">取消</a>
+      <div>
+        <button type="submit" name="saveAsDraft" value="true" class="btn btn-outline-secondary me-2">存草稿</button>
+        <button type="submit" class="btn btn-primary">发布文章</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#content').summernote({
+      height: 400,
+      callbacks: {
+        onImageUpload: function(files) {
+          var data = new FormData();
+          data.append("file", files[0]);
+          $.ajax({
+            url: "/upload/image",
+            type: "POST",
+            data: data,
+            processData: false,
+            contentType: false,
+            success: function(resp) {
+              if (resp.error) {
+                alert("上传失败：" + resp.error);
+              } else {
+                $('#content').summernote('insertImage', resp.url);
+              }
+            },
+            error: function(xhr) {
+              alert("图片上传失败，HTTP状态码：" + xhr.status);
+            }
+          });
+        }
+      }
+    });
+  });
+  $('#coverFile').on('change', function() {
+    var file = this.files[0];
+    if (!file) return;
+    var formData = new FormData();
+    formData.append('file', file);
+    $.ajax({
+        url: '/upload/image',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(resp) {
+            if (resp.error) {
+                alert('上传失败：' + resp.error);
+            } else {
+                // 将返回的URL设置到隐藏字段
+                $('input[name="coverImage"]').val(resp.url);
+                // 可选：在页面上显示预览图
+                $('#coverPreview').remove();
+                $('<img id="coverPreview" src="' + resp.url + '" style="max-height: 100px; margin-top: 10px;">').insertAfter('#coverFile');
+            }
+        },
+        error: function() {
+            alert('封面图片上传失败');
+        }
+    });
+});
+</script>
+</body>
+</html>
